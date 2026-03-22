@@ -270,10 +270,10 @@ def load_data():
 def generate_sample_data():
     """실제 CSV 없을 때 시뮬레이션 데이터 생성"""
     np.random.seed(42)
-    n = 50000
-    dates = pd.date_range('2025-12-01', '2025-12-31', freq='1min')
-    sampled_dates = np.random.choice(dates, n, replace=False)
-    sampled_dates = sorted(sampled_dates)
+    dates = pd.date_range("2025-12-01", "2025-12-31", freq="1min")
+    n = min(50000, len(dates))
+    idx = np.random.choice(len(dates), size=n, replace=False)
+    sampled_dates = sorted(dates[idx].to_pydatetime())
 
     bike_types = np.random.choice(['일반자전거', '새싹자전거'], n, p=[0.99, 0.01])
     genders = np.random.choice(['M', 'F', '알수없음'], n, p=[0.56, 0.27, 0.17])
