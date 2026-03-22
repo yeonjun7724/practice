@@ -209,21 +209,29 @@ def load_data():
     rent_path = "data/서울특별시 공공자전거 대여이력 정보_2512.csv"
     station_path = "data/공공자전거 대여소 정보(25.12월 기준).csv"
 
-    if os.path.exists(rent_path) and os.path.exists(station_path):
-        rent = pd.read_csv(rent_path, encoding='cp949', encoding_errors='replace', low_memory=False)
-        station = pd.read_csv(station_path, encoding='utf-8')
-        rent.columns = [
-            '자전거번호','대여일시','대여소번호','대여소명','대여거치대',
-            '반납일시','반납소번호','반납소명','반납거치대','이용시간',
-            '이용거리','생년','성별','이용자종류','대여소ID','반납소ID','자전거구분'
-        ]
-        station.columns = [
-            '대여소번호','대여소명','자치구','상세주소','위도','경도','설치시기','거치대수','기타'
-        ]
-        use_sample = False
+    def file_ok(path):
+        return os.path.exists(path) and os.path.getsize(path) > 1024
+
+    use_sample = True
+    if file_ok(rent_path) and file_ok(station_path):
+        try:
+            rent = pd.read_csv(rent_path, encoding='cp949', encoding_errors='replace', low_memory=False)
+            station = pd.read_csv(station_path, encoding='utf-8')
+            if rent.empty or station.empty:
+                raise ValueError("빈 파일")
+            rent.columns = [
+                '자전거번호','대여일시','대여소번호','대여소명','대여거치대',
+                '반납일시','반납소번호','반납소명','반납거치대','이용시간',
+                '이용거리','생년','성별','이용자종류','대여소ID','반납소ID','자전거구분'
+            ]
+            station.columns = [
+                '대여소번호','대여소명','자치구','상세주소','위도','경도','설치시기','거치대수','기타'
+            ]
+            use_sample = False
+        except Exception:
+            rent, station = generate_sample_data()
     else:
         rent, station = generate_sample_data()
-        use_sample = True
 
     # 전처리
     rent['성별'] = rent['성별'].fillna('알수없음').str.upper()
