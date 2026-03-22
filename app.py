@@ -241,7 +241,7 @@ def load_data():
     use_sample = True
     if file_ok(rent_path) and file_ok(station_path):
         try:
-            rent = pd.read_csv(rent_path, encoding='cp949', encoding_errors='replace', low_memory=False)
+            rent = pd.read_csv(rent_path, encoding='utf-8', encoding_errors='replace', low_memory=False)
             station = pd.read_csv(station_path, encoding='utf-8')
             if rent.empty or station.empty:
                 raise ValueError("빈 파일")
