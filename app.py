@@ -23,21 +23,47 @@ st.set_page_config(
 # ── 한글 폰트 설정 ───────────────────────────────────────
 @st.cache_resource
 def setup_font():
-    """시스템에서 사용 가능한 한글 폰트를 탐색하여 설정"""
-    font_candidates = [
-        'NanumGothic', 'NanumBarunGothic', 'NanumBarunpen',
-        'Malgun Gothic', 'AppleGothic', 'DejaVu Sans'
-    ]
+    """
+    Streamlit Cloud(Linux) 환경에서 NanumGothic 폰트를 직접 찾아 등록.
+    packages.txt 에 fonts-nanum 이 선언되어 있어야 합니다.
+    """
+    import subprocess
+    # fc-list로 나눔 폰트 경로 탐색
+    try:
+        result = subprocess.run(['fc-list', ':lang=ko'], capture_output=True, text=True)
+        for line in result.stdout.splitlines():
+            if 'Nanum' in line or 'nanum' in line:
+                font_path = line.split(':')[0].strip()
+                fm.fontManager.addfont(font_path)
+    except Exception:
+        pass
+
+    # 우선순위 순으로 폰트 선택
     available = {f.name for f in fm.fontManager.ttflist}
-    for font in font_candidates:
+    for font in ['NanumGothic', 'NanumBarunGothic', 'Malgun Gothic', 'AppleGothic']:
         if font in available:
             plt.rcParams['font.family'] = font
+            plt.rcParams['axes.unicode_minus'] = False
             return font
+
+    # 최후 수단: ttf 파일 직접 지정
+    fallback_paths = [
+        '/usr/share/fonts/truetype/nanum/NanumGothic.ttf',
+        '/usr/share/fonts/truetype/nanum/NanumGothicBold.ttf',
+    ]
+    for fp in fallback_paths:
+        if os.path.exists(fp):
+            fm.fontManager.addfont(fp)
+            prop = fm.FontProperties(fname=fp)
+            plt.rcParams['font.family'] = prop.get_name()
+            plt.rcParams['axes.unicode_minus'] = False
+            return prop.get_name()
+
     plt.rcParams['font.family'] = 'DejaVu Sans'
+    plt.rcParams['axes.unicode_minus'] = False
     return 'DejaVu Sans'
 
 chosen_font = setup_font()
-plt.rcParams['axes.unicode_minus'] = False
 sns.set_theme(font=chosen_font, font_scale=1.0)
 
 # ── CSS 스타일 ───────────────────────────────────────────
@@ -206,8 +232,8 @@ h1, h2, h3 { color: #e2e8f0 !important; }
 @st.cache_data
 def load_data():
     """샘플 데이터 생성 (실제 CSV 없을 경우 시뮬레이션)"""
-    rent_path = "./서울특별시 공공자전거 대여이력 정보_2512.csv"
-    station_path = "./공공자전거 대여소 정보(25.12월 기준).csv"
+    rent_path = "data/서울특별시 공공자전거 대여이력 정보_2512.csv"
+    station_path = "data/공공자전거 대여소 정보(25.12월 기준).csv"
 
     def file_ok(path):
         return os.path.exists(path) and os.path.getsize(path) > 1024
