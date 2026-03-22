@@ -206,8 +206,8 @@ h1, h2, h3 { color: #e2e8f0 !important; }
 @st.cache_data
 def load_data():
     """샘플 데이터 생성 (실제 CSV 없을 경우 시뮬레이션)"""
-    rent_path = "data/서울특별시 공공자전거 대여이력 정보_2512.csv"
-    station_path = "data/공공자전거 대여소 정보(25.12월 기준).csv"
+    rent_path = "./data/서울특별시 공공자전거 대여이력 정보_2512.csv"
+    station_path = "./data/공공자전거 대여소 정보(25.12월 기준).csv"
 
     def file_ok(path):
         return os.path.exists(path) and os.path.getsize(path) > 1024
